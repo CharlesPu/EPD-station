@@ -6,10 +6,10 @@
 #include <WiFiMulti.h>
 
 
-//#define WIFI_AP_NAME "PW55"
-//#define WIFI_AP_PWD  "097103603"
-#define WIFI_AP_NAME "TP-LINK1215"
-#define WIFI_AP_PWD  "88888888"
+#define WIFI_AP_NAME "PW55"
+#define WIFI_AP_PWD  "097103603"
+// #define WIFI_AP_NAME "TP-LINK1215"
+// #define WIFI_AP_PWD  "88888888"
 
 
 //#define URL_WEATHER "https://e.weather.com.cn/mweather/101210101.shtml"
