@@ -84,17 +84,18 @@
 #include "EPD_4in2bc.h"
 #include "Debug.h"
 
+epd_gpio_t *epd_gpio_4in2;
 /******************************************************************************
 function :	Software reset
 parameter:
 ******************************************************************************/
 static void EPD_4IN2BC_Reset(void)
 {
-    DEV_Digital_Write(EPD_RST_PIN, 1);
+    DEV_Digital_Write(epd_gpio_4in2->RES_Pin, 1);
     DEV_Delay_ms(200);
-    DEV_Digital_Write(EPD_RST_PIN, 0);
+    DEV_Digital_Write(epd_gpio_4in2->RES_Pin, 0);
     DEV_Delay_ms(5);
-    DEV_Digital_Write(EPD_RST_PIN, 1);
+    DEV_Digital_Write(epd_gpio_4in2->RES_Pin, 1);
     DEV_Delay_ms(200);
 }
 
@@ -105,10 +106,10 @@ parameter:
 ******************************************************************************/
 static void EPD_4IN2BC_SendCommand(UBYTE Reg)
 {
-    DEV_Digital_Write(EPD_DC_PIN, 0);
-    DEV_Digital_Write(EPD_CS_PIN, 0);
-    DEV_SPI_WriteByte(Reg);
-    DEV_Digital_Write(EPD_CS_PIN, 1);
+    DEV_Digital_Write(epd_gpio_4in2->DC_Pin, 0);
+    DEV_Digital_Write(epd_gpio_4in2->CS_Pin, 0);
+    DEV_SPI_WriteByte(epd_gpio_4in2, Reg);
+    DEV_Digital_Write(epd_gpio_4in2->CS_Pin, 1);
 }
 
 /******************************************************************************
@@ -118,10 +119,10 @@ parameter:
 ******************************************************************************/
 static void EPD_4IN2BC_SendData(UBYTE Data)
 {
-    DEV_Digital_Write(EPD_DC_PIN, 1);
-    DEV_Digital_Write(EPD_CS_PIN, 0);
-    DEV_SPI_WriteByte(Data);
-    DEV_Digital_Write(EPD_CS_PIN, 1);
+    DEV_Digital_Write(epd_gpio_4in2->DC_Pin, 1);
+    DEV_Digital_Write(epd_gpio_4in2->CS_Pin, 0);
+    DEV_SPI_WriteByte(epd_gpio_4in2, Data);
+    DEV_Digital_Write(epd_gpio_4in2->CS_Pin, 1);
 }
 
 /******************************************************************************
@@ -131,7 +132,7 @@ parameter:
 void EPD_4IN2BC_ReadBusy(void)
 {
     Debug("e-Paper busy\r\n");
-    while(DEV_Digital_Read(EPD_BUSY_PIN) == 0) {      //0: busy, 1: idle
+    while(DEV_Digital_Read(epd_gpio_4in2->BUSY_Pin) == 0) {      //0: busy, 1: idle
         DEV_Delay_ms(100);
     }
     Debug("e-Paper busy release\r\n");
@@ -169,8 +170,10 @@ void EPD_4IN2BC_Init_LUT(void){
 function :	Initialize the e-Paper register
 parameter:
 ******************************************************************************/
-void EPD_4IN2BC_Init(void)
+void EPD_4IN2BC_Init(epd_gpio_t *gpio)
 {
+    epd_gpio_4in2 = gpio;
+    DEV_Module_Init(epd_gpio_4in2);
     EPD_4IN2BC_Reset();
 
     EPD_4IN2BC_SendCommand(0x06); // BOOSTER_SOFT_START

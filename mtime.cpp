@@ -34,6 +34,7 @@ void printLocalTime()
   Serial.print(F("Current Local time: "));
 //  Serial.println(&timeinfo, "%F %T %A");
   Serial.print(asctime(&timeinfo));
+  // Serial.printf(" | %d %d %d\r\n", timeinfo.tm_sec, timeinfo.tm_min, timeinfo.tm_hour);
 }
 
 

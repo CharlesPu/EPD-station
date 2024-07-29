@@ -30,12 +30,13 @@
 #include "DEV_Config.h"
 //#include <SPI.h>
 
-int EPD_SCK_PIN;
-int EPD_MOSI_PIN;
-int EPD_CS_PIN;
-int EPD_RST_PIN;
-int EPD_DC_PIN;
-int EPD_BUSY_PIN;
+// int EPD_SCK_PIN;
+// int EPD_MOSI_PIN;
+// int EPD_CS_PIN;
+// int EPD_RST_PIN;
+// int EPD_DC_PIN;
+// int EPD_BUSY_PIN;
+
 
 void EPD_SPI_init(epd_gpio_t* g){
 //	pinMode(g->BUSY_Pin, INPUT); 
@@ -52,18 +53,18 @@ void EPD_SPI_init(epd_gpio_t* g){
 //	SPI.setDataMode(SPI_MODE0);    
 }
 
-void GPIO_Config(void)
+void GPIO_Config(epd_gpio_t* gpio)
 {
-    pinMode(EPD_BUSY_PIN,  INPUT);
-    pinMode(EPD_RST_PIN , OUTPUT);
-    pinMode(EPD_DC_PIN  , OUTPUT);
+    pinMode(gpio->BUSY_Pin,  INPUT);
+    pinMode(gpio->RES_Pin , OUTPUT);
+    pinMode(gpio->DC_Pin  , OUTPUT);
     
-    pinMode(EPD_SCK_PIN, OUTPUT);
-    pinMode(EPD_MOSI_PIN, OUTPUT);
-    pinMode(EPD_CS_PIN , OUTPUT);
+    pinMode(gpio->SCL_Pin, OUTPUT);
+    pinMode(gpio->SDI_Pin, OUTPUT);
+    pinMode(gpio->CS_Pin , OUTPUT);
 
-    digitalWrite(EPD_CS_PIN , HIGH);
-    digitalWrite(EPD_SCK_PIN, LOW);
+    digitalWrite(gpio->CS_Pin , HIGH);
+    digitalWrite(gpio->SCL_Pin, LOW);
 }
 
 void GPIO_Mode(UWORD GPIO_Pin, UWORD Mode)
@@ -81,15 +82,15 @@ Info:
 ******************************************************************************/
 UBYTE DEV_Module_Init(epd_gpio_t* g)
 {
-	EPD_SCK_PIN = g->SCL_Pin;
-	EPD_MOSI_PIN = g->SDI_Pin;
-	EPD_CS_PIN = g->CS_Pin;
-	EPD_RST_PIN= g->RES_Pin;
-	EPD_DC_PIN= g->DC_Pin;
-	EPD_BUSY_PIN= g->BUSY_Pin;
+	// EPD_SCK_PIN = g->SCL_Pin;
+	// EPD_MOSI_PIN = g->SDI_Pin;
+	// EPD_CS_PIN = g->CS_Pin;
+	// EPD_RST_PIN= g->RES_Pin;
+	// EPD_DC_PIN= g->DC_Pin;
+	// EPD_BUSY_PIN= g->BUSY_Pin;
 	
 	//gpio
-	GPIO_Config();
+	GPIO_Config(g);
 
 	//serial printf
 //	Serial.begin(115200);
@@ -112,7 +113,7 @@ UBYTE DEV_Module_Init(epd_gpio_t* g)
 function:
 			SPI read and write
 ******************************************************************************/
-void DEV_SPI_WriteByte(UBYTE data)
+void DEV_SPI_WriteByte(epd_gpio_t* gpio, UBYTE data)
 {
 //	digitalWrite(EPD_CS_PIN, GPIO_PIN_RESET);
 //	SPI.transfer(data);
@@ -120,44 +121,44 @@ void DEV_SPI_WriteByte(UBYTE data)
 //	return;
 
     //SPI.beginTransaction(spi_settings);
-    digitalWrite(EPD_CS_PIN, GPIO_PIN_RESET);
+    digitalWrite(gpio->CS_Pin, GPIO_PIN_RESET);
 
     for (int i = 0; i < 8; i++)
     {
-        if ((data & 0x80) == 0) digitalWrite(EPD_MOSI_PIN, GPIO_PIN_RESET); 
-        else                    digitalWrite(EPD_MOSI_PIN, GPIO_PIN_SET);
+        if ((data & 0x80) == 0) digitalWrite(gpio->SDI_Pin, GPIO_PIN_RESET); 
+        else                    digitalWrite(gpio->SDI_Pin, GPIO_PIN_SET);
 
         data <<= 1;
-        digitalWrite(EPD_SCK_PIN, GPIO_PIN_SET);     
-        digitalWrite(EPD_SCK_PIN, GPIO_PIN_RESET);
+        digitalWrite(gpio->SCL_Pin, GPIO_PIN_SET);     
+        digitalWrite(gpio->SCL_Pin, GPIO_PIN_RESET);
     }
 
     //SPI.transfer(data);
-    digitalWrite(EPD_CS_PIN, GPIO_PIN_SET);
+    digitalWrite(gpio->CS_Pin, GPIO_PIN_SET);
     //SPI.endTransaction();	
 }
 
-UBYTE DEV_SPI_ReadByte()
+UBYTE DEV_SPI_ReadByte(epd_gpio_t* gpio)
 {
     UBYTE j=0xff;
-    GPIO_Mode(EPD_MOSI_PIN, 0);
-    digitalWrite(EPD_CS_PIN, GPIO_PIN_RESET);
+    GPIO_Mode(gpio->SDI_Pin, 0);
+    digitalWrite(gpio->CS_Pin, GPIO_PIN_RESET);
     for (int i = 0; i < 8; i++)
     {
         j = j << 1;
-        if (digitalRead(EPD_MOSI_PIN))  j = j | 0x01;
+        if (digitalRead(gpio->SDI_Pin))  j = j | 0x01;
         else                            j = j & 0xfe;
         
-        digitalWrite(EPD_SCK_PIN, GPIO_PIN_SET);     
-        digitalWrite(EPD_SCK_PIN, GPIO_PIN_RESET);
+        digitalWrite(gpio->SCL_Pin, GPIO_PIN_SET);     
+        digitalWrite(gpio->SCL_Pin, GPIO_PIN_RESET);
     }
-    digitalWrite(EPD_CS_PIN, GPIO_PIN_SET);
-    GPIO_Mode(EPD_MOSI_PIN, 1);
+    digitalWrite(gpio->CS_Pin, GPIO_PIN_SET);
+    GPIO_Mode(gpio->SDI_Pin, 1);
     return j;
 }
 
-void DEV_SPI_Write_nByte(UBYTE *pData, UDOUBLE len)
+void DEV_SPI_Write_nByte(epd_gpio_t* gpio, UBYTE *pData, UDOUBLE len)
 {
     for (int i = 0; i < len; i++)
-        DEV_SPI_WriteByte(pData[i]);
+        DEV_SPI_WriteByte(gpio, pData[i]);
 }

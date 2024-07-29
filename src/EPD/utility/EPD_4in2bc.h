@@ -185,7 +185,7 @@ static const unsigned char lut_wb_4in2[] =
 };
 
 
-void EPD_4IN2BC_Init(void);
+void EPD_4IN2BC_Init(epd_gpio_t *epd_gpio);
 void EPD_4IN2BC_Clear(void);
 void EPD_4IN2BC_Display(const UBYTE *blackimage, const UBYTE *ryimage);
 void EPD_4IN2BC_Sleep(void);

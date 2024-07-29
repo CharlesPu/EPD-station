@@ -21,7 +21,8 @@ void SPI_Write(unsigned char value);
 void EPD_W21_Writedatas(unsigned char command);
 void EPD_W21_WriteCMD(unsigned char command);
 void Epaper_READBUSY(void);
-void EPD_HW_Init(void); //Electronic paper initialization
+void EPD_2IN9_Init(epd_gpio_t *gpio);
+void EPD_HW_Init(); //Electronic paper initialization
 void EPD_Part_Init(void); //Local refresh initialization
 
 void EPD_Part_Update(void); 
@@ -33,10 +34,11 @@ void EPD_DeepSleep(void);
 //Display 
 void EPD_WhiteScreen_ALL(void);
 void EPD_SetRAMValue_BaseMap(const unsigned char * datass);
-void EPD_Dis_Part(unsigned int x_start,unsigned int y_start,const unsigned char * datass,unsigned int PART_COLUMN,unsigned int PART_LINE);
+void EPD_Dis_Part(unsigned int x_start,unsigned int y_start,const unsigned char * datass,unsigned int PART_LINE,unsigned int PART_COLUMN);
 
 
 //////////////////////Partial refresh number/////////////////////
+
 //Digital presentation
 const unsigned char gImage_num1[128]PROGMEM = { /* 0X02,0X01,0X20,0X00,0X20,0X00, */
 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -735,9 +737,19 @@ const unsigned char gImage_1[4736] PROGMEM = { /* 0X01,0X01,0XFA,0X00,0X7A,0X00,
 
 
 
-
 /////////////////////////////////////////////////////////////////////////////////
-
+static const unsigned char* gImage_nums[10] PROGMEM = {
+  gImage_num1, // todo 
+  gImage_num1,
+  gImage_num2,
+  gImage_num3,
+  gImage_num4,
+  gImage_num5,
+  gImage_num6,
+  gImage_num7,
+  gImage_num8,
+  gImage_num9,
+};
 
 
 #endif

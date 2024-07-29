@@ -117,6 +117,7 @@ void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD
         Paint.Width = Height;
         Paint.Height = Width;
     }
+    // Paint_Clear(Color);
 }
 
 /******************************************************************************

@@ -44,12 +44,12 @@ typedef struct {
 	int SDI_Pin;
 }epd_gpio_t;
 
-extern int EPD_SCK_PIN;
-extern int EPD_MOSI_PIN;
-extern int EPD_CS_PIN;
-extern int EPD_RST_PIN;
-extern int EPD_DC_PIN;
-extern int EPD_BUSY_PIN;
+// extern int EPD_SCK_PIN;
+// extern int EPD_MOSI_PIN;
+// extern int EPD_CS_PIN;
+// extern int EPD_RST_PIN;
+// extern int EPD_DC_PIN;
+// extern int EPD_BUSY_PIN;
 
 /**
  * data
@@ -86,9 +86,9 @@ extern int EPD_BUSY_PIN;
 /*------------------------------------------------------------------------------------------------------*/
 UBYTE DEV_Module_Init(epd_gpio_t* g);
 void GPIO_Mode(UWORD GPIO_Pin, UWORD Mode);
-void DEV_SPI_WriteByte(UBYTE data);
-UBYTE DEV_SPI_ReadByte();
-void DEV_SPI_Write_nByte(UBYTE *pData, UDOUBLE len);
+void DEV_SPI_WriteByte(epd_gpio_t* g, UBYTE data);
+UBYTE DEV_SPI_ReadByte(epd_gpio_t* g);
+void DEV_SPI_Write_nByte(epd_gpio_t* g, UBYTE *pData, UDOUBLE len);
 
 #endif
 
