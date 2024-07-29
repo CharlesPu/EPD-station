@@ -92,6 +92,9 @@ weather_info_t getForecastWeather(String city){
 				r.weathers[i].text = results[0]["daily"][i]["text_day"];
 				r.weathers[i].code = results[0]["daily"][i]["code_day"];
 				r.weathers[i].temp = results[0]["daily"][i]["high"];
+        r.weathers[i].temp_low = results[0]["daily"][i]["low"];
+        r.weathers[i].temp_high = results[0]["daily"][i]["high"];
+        r.weathers[i].humidity = results[0]["daily"][i]["humidity"];
 			}
 		}
 	}

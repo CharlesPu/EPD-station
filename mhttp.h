@@ -24,6 +24,9 @@ typedef struct{
 	const char* text;
 	int code;
 	const char* temp;
+  const char* temp_low;
+  const char* temp_high;
+  const char* humidity;
 }weather_t;
 
 typedef struct{

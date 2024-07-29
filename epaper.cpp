@@ -424,7 +424,7 @@ void EPD_2in9_draw_header(int x)
 void EPD_2in9_draw_weather(weather_info_t *w)
 {
   int area_height = 48;
-  int area_width = 128;
+  int area_width = 296;
   UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
   UBYTE BlackImage[Imagesize]={};
 
@@ -432,9 +432,61 @@ void EPD_2in9_draw_weather(weather_info_t *w)
   Paint_Clear(WHITE);
   Paint_SetMirroring(MIRROR_VERTICAL); 
 
-  Paint_DrawImage(w_codes[0].code_pic_48, 0, 0, 48, 48);
-  Paint_DrawString_EN(50, 5, w->weathers[0].date, &Font12, WHITE, BLACK);
-  Paint_DrawString_EN(50, 25, w->weathers[0].temp, &Font12, WHITE, BLACK);
+  for (int i = 0; i < w_codes_len; ++i)
+  {
+    for (int j = 0; j < CODE_MAP_MAX; ++j)
+    {
+      for (int k = 0; k < 3; ++k)
+      {
+        weather_t ww = w->weathers[k];
+        int start_pic_x, start_pic_y;
+        int start_temp_low_x, start_temp_low_y;
+        int start_temp_high_x, start_temp_high_y;
+        sFONT ff = Font16;
+        unsigned char *buf = w_codes[i].code_pic_48;
+        int bufS = 48;
 
-  EPD_Dis_Part(45, 280, BlackImage, area_height, area_width); 
+        if (w_codes[i].code[j] == ww.code + 1)
+        { //. matched
+          if (k == 0)
+          {
+            start_pic_x = 0;
+            start_pic_y = 0;
+            start_temp_low_x = 100;
+            start_temp_low_y = 30;
+            start_temp_high_x = 100;
+            start_temp_high_y = 5;
+          }
+          else if (k == 1)
+          {
+            start_pic_x = 0;
+            start_pic_y = 120;
+            start_temp_low_x = 170;
+            start_temp_low_y = 30;
+            start_temp_high_x = 170;
+            start_temp_high_y = 5;
+          }
+          else if (k == 2)
+          {
+            start_pic_x = 0;
+            start_pic_y = 200;
+            start_temp_low_x = 250;
+            start_temp_low_y = 30;
+            start_temp_high_x = 250;
+            start_temp_high_y = 5;
+          }
+
+          printf("pick  %d \r\n", w_codes[i].code[j]);
+          Paint_DrawImage(buf, start_pic_x, start_pic_y, bufS, bufS);
+
+          Paint_DrawString_EN(start_temp_low_x, start_temp_low_y, ww.temp_low, &ff, WHITE, BLACK);
+          Paint_DrawString_EN(start_temp_high_x, start_temp_high_y, ww.temp_high, &ff, WHITE, BLACK);
+          // Paint_DrawString_EN(50, 5, w->weathers[0].date, &Font12, WHITE, BLACK);
+          // Paint_DrawString_EN(50, 25, w->weathers[0].temp, &Font12, WHITE, BLACK);
+        }
+      }
+    }
+  }
+
+  EPD_Dis_Part(45, 296, BlackImage, area_height, area_width); 
 }
