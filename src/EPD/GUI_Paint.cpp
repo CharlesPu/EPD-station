@@ -529,6 +529,9 @@ void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
     }
 
     uint32_t Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
+    // if (Acsii_Char == '1') {
+        // printf("aaaaaa %c %d\r\n", Acsii_Char, Char_Offset);
+    // }
     const unsigned char *ptr = &Font->table[Char_Offset];
 
     for (Page = 0; Page < Font->Height; Page ++ ) {
@@ -809,7 +812,24 @@ void Paint_DrawImage(const unsigned char *image_buffer, UWORD xStart, UWORD ySta
         for (x = 0; x < w_byte; x++) {//8 pixel =  1 byte
             Addr = x + y * w_byte;
 			pAddr=x+(xStart/8)+((y+yStart)*Paint.WidthByte);
+            // printf("cccc %d %d\r\n", Addr, pAddr);
             Paint.Image[pAddr] = (unsigned char)image_buffer[Addr];
+
+        }
+    }
+}
+
+void Paint_DrawImage2(const unsigned char *image_buffer, UWORD xStart, UWORD yStart, UWORD W_Image, UWORD H_Image) 
+{
+    UWORD x, y;
+	UWORD w_byte=(W_Image%8)?(W_Image/8)+1:W_Image/8;
+    UDOUBLE Addr = 0;
+    for (y = 0; y < H_Image; y++) {
+        for (x = 0; x < W_Image; x++) {
+            UWORD tmp = x/8;
+            Addr = tmp + y * w_byte;
+            // printf("aaaa %d %d %d\r\n", Addr, x , y);
+            Paint_SetPixel(x+xStart, y+yStart,(image_buffer[Addr] & (0x80 >> (x % 8)))? WHITE:BLACK);
         }
     }
 }

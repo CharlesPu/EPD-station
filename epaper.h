@@ -3,10 +3,20 @@
 
 #include "mhttp.h"
 #include "src/EPD/EPD.h"
+#include "src/EPD/GUI_Paint.h"
 
-#define REFRESH_TIME_INTERVAL 5 // s
-#define REFRESH_WEATHER_INTERVAL 30 // s
-#define REFRESH_ALL_INTERVAL 5*60 // 强制全部刷新
+
+
+typedef struct{
+  unsigned char *image;
+  int image_width,image_height;
+
+  int start_image_x, start_image_y;
+  int start_temp_high_x, start_temp_high_y;
+  int start_humidity_x, start_humidity_y;
+  sFONT ff;
+  sFONT ff_temp;
+}weather_paint_t;
 
 void EPD_4in2bc_demo(void);
 void EPD_4in2bc_weather(weather_info_t*);

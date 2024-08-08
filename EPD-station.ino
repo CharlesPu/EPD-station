@@ -5,14 +5,11 @@
 #include "epaper.h"
 #include "mhttp.h"
 #include "mtime.h"
+#include "config.h"
 
 #include "src/RGBLed/rgbled.h"
 
 Ticker ticker1;
-// #define REFRESH_TIME_INTERVAL 3 // s
-// #define REFRESH_WEATHER_INTERVAL 30 // s
-#define TIMER_INTERVAL 30 // s
-
 
 void timer_cb(){
 	LED_blink();
@@ -21,6 +18,7 @@ void timer_cb(){
 /* Entry point ----------------------------------------------------------------*/
 void setup()
 {
+  srand(time(NULL));
 	Serial.begin(115200);
 
 	RGBLED_init(10);

@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <string.h>
+#include "config.h"
 
 WiFiMulti mwifiMulti;
 

@@ -32,11 +32,20 @@
 #ifndef _IMAGEDATA_H_
 #define _IMAGEDATA_H_
 
+#define gImage_header_cloud_height 32
+#define gImage_header_cloud_width 99
+
+#define gImage_header_sun_height 32
+#define gImage_header_sun_width 32
+
 extern const unsigned char gImage_4in2bc_b[];
 extern const unsigned char gImage_4in2bc_ry[];
 extern const unsigned char gImage_pu_wang_1[];
 extern const unsigned char gImage_pu_wang_2[];
 extern const unsigned char gImage_header_cloud[];
+extern const unsigned char gImage_header_cloud2[];
+
+extern const unsigned char *gImage_header_suns[];
 
 #endif
 /* FILE END */

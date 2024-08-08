@@ -1,7 +1,7 @@
 #include "epaper.h"
 #include "src/EPD/DEV_Config.h"
-#include "src/EPD/GUI_Paint.h"
 #include "ImageData.h"
+#include "config.h"
 #include "weather.h"
 
 #include <stdlib.h>
@@ -23,6 +23,7 @@ epd_gpio_t epd_gpio_2 = {
     .SCL_Pin = 37,
     .SDI_Pin = 38,
 };
+
 
 void EPD_4in2bc_weather(weather_info_t *w)
 {
@@ -314,12 +315,12 @@ void EPD_2in9_demo(void)
 //                            X
 //                            |
 //                           128
-////// painter
-//  0----->----X----->-------296
-//  |
-//  Y
-//  |
-// 128
+////// painter                =====>>   rotate and mirror, or pic generate set
+//  0----->----Y----->-------296        0----->----X----->-------296     
+//  |                                   |     
+//  X                                   Y     
+//  |                                   |     
+// 128                                 128      
 //////////////////////////////
 void EPD_2in9_station()
 {
@@ -330,7 +331,7 @@ void EPD_2in9_station()
   delay(500);
 
   uint32_t cnt=0;
-  uint32_t header_x=0;
+  uint32_t header_y=0;
   while(1){
     if ((cnt%(REFRESH_ALL_INTERVAL/REFRESH_TIME_INTERVAL)==0)) {// 强制全局刷新
       printf("2in9 force all refresh...\r\n");
@@ -347,20 +348,21 @@ void EPD_2in9_station()
       EPD_2in9_draw_weather(&w);
       delay(100);
     }
-    printf("2in9 draw time...\r\n");
+    // printf("2in9 draw time...\r\n");
     EPD_2in9_draw_time_once();
 
-    printf("2in9 draw header...\r\n");
-    if (header_x <= EPD_2IN9_HEIGHT-100) {
-      
-      EPD_2in9_draw_header(header_x);
-      header_x+=10;
-    }else {
-      header_x=0;
+    if (cnt%(REFRESH_HEADER_INTERVAL/REFRESH_TIME_INTERVAL)==0){
+      // printf("2in9 draw header...\r\n");
+      if (header_y <= EPD_2IN9_HEIGHT-gImage_header_cloud_width) {
+        EPD_2in9_draw_header(header_y);
+        header_y+=10;
+      }else {
+        header_y=0;
+      }
     }
     delay(100);
 //////////////////////////////////////////////////////////////////////// 
-    printf("2in9 Goto Sleep...\r\n");
+    // printf("2in9 Goto Sleep...\r\n");
     EPD_DeepSleep(); // Enter deep sleep,Sleep instruction is necessary, please do not delete!!!
     delay(REFRESH_TIME_INTERVAL * 1000);
     cnt++;
@@ -369,7 +371,7 @@ void EPD_2in9_station()
 
 void EPD_2in9_draw_time_once()
 {
-  sFONT ff = Font24;
+  sFONT ff = Font48;
   int area_height = ff.Height;
   int area_width = ff.Width * 7;
 
@@ -396,41 +398,37 @@ void EPD_2in9_draw_time_once()
       sPaint_time.Sec = timeinfo.tm_sec;
     Paint_ClearWindows(0, 0, 0 + area_width, 0 + area_height, WHITE);
     Paint_DrawTime(0, 0, &sPaint_time, &ff, WHITE, BLACK);
-    EPD_Dis_Part(104, 200, BlackImage, area_height, area_width); 
+    EPD_Dis_Part(88, 270, BlackImage, area_height, area_width); 
     // delay(1000);
   // }
 }
 
-void EPD_2in9_draw_header(int x)
+void EPD_2in9_draw_header(int y)
 {
   int area_height = 32;
   int area_width = 296;
   UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
   UBYTE BlackImage[Imagesize]={};
 
-  Paint_NewImage(BlackImage, area_height, area_width, ROTATE_270, WHITE);
+  Paint_NewImage(BlackImage, area_height, area_width, ROTATE_0, WHITE);
   Paint_Clear(WHITE);
-  Paint_SetMirroring(MIRROR_VERTICAL); 
   // Paint_DrawString_EN(0, 0, "123456789", &Font20, BLACK, WHITE);
-  Paint_DrawImage(gImage_header_cloud, 0, x, 32, 100);
+  int tmp11 = rand()%5;
+  int tmp22 = rand()%(area_width-gImage_header_sun_width+1);
+  // printf("bbbb %d %d\r\n",tmp11, tmp22);
+  Paint_DrawImage(gImage_header_suns[tmp11], 0, tmp22, gImage_header_sun_height, gImage_header_sun_width);
+  Paint_DrawImage(gImage_header_cloud2, 0, y, gImage_header_cloud_height, gImage_header_cloud_width);
 
   // for (size_t i = 296; i >= 100; i-=10)
   // {
-    EPD_Dis_Part(0, 296, BlackImage, area_height, area_width); 
+    EPD_Dis_Part(0, 295, BlackImage, area_height, area_width); 
     // delay(1000);
   // }
 }
 
 void EPD_2in9_draw_weather(weather_info_t *w)
 {
-  int area_height = 48;
-  int area_width = 296;
-  UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
-  UBYTE BlackImage[Imagesize]={};
-
-  Paint_NewImage(BlackImage, area_height, area_width, ROTATE_270, WHITE);
-  Paint_Clear(WHITE);
-  Paint_SetMirroring(MIRROR_VERTICAL); 
+  weather_paint_t wps[3]={};
 
   for (int i = 0; i < w_codes_len; ++i)
   {
@@ -439,54 +437,79 @@ void EPD_2in9_draw_weather(weather_info_t *w)
       for (int k = 0; k < 3; ++k)
       {
         weather_t ww = w->weathers[k];
-        int start_pic_x, start_pic_y;
-        int start_temp_low_x, start_temp_low_y;
-        int start_temp_high_x, start_temp_high_y;
-        sFONT ff = Font16;
-        unsigned char *buf = w_codes[i].code_pic_48;
-        int bufS = 48;
 
         if (w_codes[i].code[j] == ww.code + 1)
         { //. matched
+          weather_paint_t tmp = {};
+          tmp.ff = Font12;
+          tmp.image = w_codes[i].code_pic_48;
+          tmp.image_height = 48; tmp.image_width = 48;
           if (k == 0)
           {
-            start_pic_x = 0;
-            start_pic_y = 0;
-            start_temp_low_x = 100;
-            start_temp_low_y = 30;
-            start_temp_high_x = 100;
-            start_temp_high_y = 5;
+            tmp.start_image_x = 45; tmp.start_image_y = 0;
+            tmp.start_temp_high_x = 50; tmp.start_temp_high_y = 30;
+            tmp.start_humidity_x=65; tmp.start_humidity_y=5;
           }
           else if (k == 1)
           {
-            start_pic_x = 0;
-            start_pic_y = 120;
-            start_temp_low_x = 170;
-            start_temp_low_y = 30;
-            start_temp_high_x = 170;
-            start_temp_high_y = 5;
+            tmp.start_image_x = 45; tmp.start_image_y = 120;
+            tmp.start_temp_high_x = 170; tmp.start_temp_high_y = 30;
+            tmp.start_humidity_x=170; tmp.start_humidity_y=5;
           }
           else if (k == 2)
           {
-            start_pic_x = 0;
-            start_pic_y = 200;
-            start_temp_low_x = 250;
-            start_temp_low_y = 30;
-            start_temp_high_x = 250;
-            start_temp_high_y = 5;
+            tmp.start_image_x = 45; tmp.start_image_y = 210;
+            tmp.start_temp_high_x = 260; tmp.start_temp_high_y = 30;
+            tmp.start_humidity_x=260; tmp.start_humidity_y=5;
           }
+          wps[k] = tmp;
 
           printf("pick  %d \r\n", w_codes[i].code[j]);
-          Paint_DrawImage(buf, start_pic_x, start_pic_y, bufS, bufS);
-
-          Paint_DrawString_EN(start_temp_low_x, start_temp_low_y, ww.temp_low, &ff, WHITE, BLACK);
-          Paint_DrawString_EN(start_temp_high_x, start_temp_high_y, ww.temp_high, &ff, WHITE, BLACK);
-          // Paint_DrawString_EN(50, 5, w->weathers[0].date, &Font12, WHITE, BLACK);
-          // Paint_DrawString_EN(50, 25, w->weathers[0].temp, &Font12, WHITE, BLACK);
         }
       }
     }
   }
 
-  EPD_Dis_Part(45, 296, BlackImage, area_height, area_width); 
+  // start paint digital
+  int area_height = 48;
+  int area_width = 296;
+  UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
+  UBYTE BlackImage[Imagesize]={};
+
+  Paint_NewImage(BlackImage, area_height, area_width, ROTATE_270, WHITE);Paint_Clear(WHITE);
+  Paint_SetMirroring(MIRROR_VERTICAL); 
+  for (int i = 0; i < 3; i++)
+  {
+    weather_paint_t tmp = wps[i];
+
+    char result1[10];
+    if (i == 0 ){
+      sprintf(result1, "%s-%s", w->weathers[i].temp_low, w->weathers[i].temp_high);
+      Paint_DrawString_EN(tmp.start_temp_high_x, tmp.start_temp_high_y, result1, &tmp.ff, WHITE, BLACK);
+      Paint_DrawString_CN(tmp.start_temp_high_x+34, tmp.start_temp_high_y-6, "℃", &Font12CN, BLACK, WHITE);
+    }else {
+      sprintf(result1, "%s", w->weathers[i].temp_high);
+      Paint_DrawString_EN(tmp.start_temp_high_x, tmp.start_temp_high_y, result1, &tmp.ff, WHITE, BLACK);
+      Paint_DrawString_CN(tmp.start_temp_high_x+16, tmp.start_temp_high_y-6, "℃", &Font12CN, BLACK, WHITE);
+    }
+    char result2[10];
+    sprintf(result2, "%s%%", w->weathers[i].humidity);
+    Paint_DrawString_EN(tmp.start_humidity_x, tmp.start_humidity_y, result2, &tmp.ff, WHITE, BLACK);
+  }
+  
+  EPD_Dis_Part(45, 295, BlackImage, area_height, area_width); 
+
+  // start paint images
+  for (int i = 0; i < 3; i++)
+  {
+    weather_paint_t tmp = wps[i];
+    UWORD is = ((tmp.image_height % 8 == 0) ? (tmp.image_height / 8) : (tmp.image_height / 8 + 1)) * tmp.image_width;
+    UBYTE bi[is]={};
+
+    Paint_NewImage(bi, tmp.image_height, tmp.image_width, ROTATE_270, WHITE);Paint_Clear(WHITE);
+    Paint_SetMirroring(MIRROR_VERTICAL);
+    Paint_DrawImage2(tmp.image, 0, 0, tmp.image_height, tmp.image_width);
+    // printf("paint pic %d %d \r\n", tmp.start_image_x, tmp.start_image_y);
+    EPD_Dis_Part(tmp.start_image_x, EPD_2IN9_HEIGHT-tmp.start_image_y-1, bi, tmp.image_height, tmp.image_width); 
+  }
 }
