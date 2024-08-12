@@ -333,14 +333,14 @@ void EPD_2in9_station()
   uint32_t cnt=0;
   uint32_t header_y=0;
   while(1){
-    if ((cnt%(REFRESH_ALL_INTERVAL/REFRESH_TIME_INTERVAL)==0)) {// 强制全局刷新
+    if ((cnt%(REFRESH_ALL_INTERVAL/REFRESH_LOOP_INTERVAL)==0)) {// 强制全局刷新
       printf("2in9 force all refresh...\r\n");
       EPD_SetRAMValue_BaseMap(nullptr);// Partial refresh background color | gImage_basemap
     }
   //////////////////////Partial refresh digital presentation//////////////////////////////////////
     EPD_Part_Init();                         // Local refresh initialization
 
-    if (cnt%(REFRESH_WEATHER_INTERVAL/REFRESH_TIME_INTERVAL)==0){
+    if (cnt%(REFRESH_WEATHER_INTERVAL/REFRESH_LOOP_INTERVAL)==0){
       // cnt=0;// init
       
       printf("2in9 draw weather...\r\n");
@@ -348,10 +348,12 @@ void EPD_2in9_station()
       EPD_2in9_draw_weather(&w);
       delay(100);
     }
-    // printf("2in9 draw time...\r\n");
-    EPD_2in9_draw_time_once();
-
-    if (cnt%(REFRESH_HEADER_INTERVAL/REFRESH_TIME_INTERVAL)==0){
+    if (cnt%(REFRESH_TIME_INTERVAL/REFRESH_LOOP_INTERVAL)==0){
+      // printf("2in9 draw time...\r\n");
+      EPD_2in9_draw_time_once();
+    }
+    
+    if (cnt%(REFRESH_HEADER_INTERVAL/REFRESH_LOOP_INTERVAL)==0){
       // printf("2in9 draw header...\r\n");
       if (header_y <= EPD_2IN9_HEIGHT-gImage_header_cloud_width) {
         EPD_2in9_draw_header(header_y);
@@ -364,7 +366,7 @@ void EPD_2in9_station()
 //////////////////////////////////////////////////////////////////////// 
     // printf("2in9 Goto Sleep...\r\n");
     EPD_DeepSleep(); // Enter deep sleep,Sleep instruction is necessary, please do not delete!!!
-    delay(REFRESH_TIME_INTERVAL * 1000);
+    delay(REFRESH_LOOP_INTERVAL * 1000);
     cnt++;
   }
 }
@@ -373,7 +375,7 @@ void EPD_2in9_draw_time_once()
 {
   sFONT ff = Font48;
   int area_height = ff.Height;
-  int area_width = ff.Width * 7;
+  int area_width = ff.Width * 5;
 
   UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
   UBYTE BlackImage[Imagesize]={};
@@ -398,7 +400,7 @@ void EPD_2in9_draw_time_once()
       sPaint_time.Sec = timeinfo.tm_sec;
     Paint_ClearWindows(0, 0, 0 + area_width, 0 + area_height, WHITE);
     Paint_DrawTime(0, 0, &sPaint_time, &ff, WHITE, BLACK);
-    EPD_Dis_Part(88, 270, BlackImage, area_height, area_width); 
+    EPD_Dis_Part(88, 230, BlackImage, area_height, area_width); 
     // delay(1000);
   // }
 }

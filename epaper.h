@@ -15,7 +15,6 @@ typedef struct{
   int start_temp_high_x, start_temp_high_y;
   int start_humidity_x, start_humidity_y;
   sFONT ff;
-  sFONT ff_temp;
 }weather_paint_t;
 
 void EPD_4in2bc_demo(void);
