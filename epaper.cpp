@@ -375,7 +375,7 @@ void EPD_2in9_draw_time_once()
 {
   sFONT ff = Font48;
   int area_height = ff.Height;
-  int area_width = ff.Width * 5;
+  int area_width = ff.Width * 6;
 
   UWORD Imagesize = ((area_height % 8 == 0) ? (area_height / 8) : (area_height / 8 + 1)) * area_width;
   UBYTE BlackImage[Imagesize]={};
